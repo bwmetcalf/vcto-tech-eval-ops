@@ -1,2 +1,6 @@
 .vagrant
 playbook.retry
+**/.terraform/*
+**/*.tfstate
+**/*.tfstate.*
+**/*.tfvars
