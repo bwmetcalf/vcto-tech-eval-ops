@@ -11,5 +11,4 @@ RUN mkdir -p /opt/countme
 
 ADD ./app.py /opt/countme/app.py
 
-ENTRYPOINT ["python3"]
-CMD ["/opt/countme/app.py"]
+ENTRYPOINT ["python3", ""/opt/countme/app.py"]
