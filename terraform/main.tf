@@ -2,6 +2,25 @@ provider "aws" {
   region = "us-east-1"
 }
 
+resource "aws_security_group" "redis" {
+  name        = "redis"
+  description = "Redis Security Group"
+
+  ingress {
+    from_port   = 6379
+    to_port     = 6379
+    protocol    = "tcp"
+    cidr_blocks = ["172.31.0.0/16"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = -1
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 resource "aws_security_group" "ssh" {
   name        = "ssh"
   description = "SSH Security Group"
@@ -10,6 +29,13 @@ resource "aws_security_group" "ssh" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = -1
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
@@ -24,6 +50,13 @@ resource "aws_security_group" "haproxy" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = -1
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
 resource "aws_security_group" "icmp" {
@@ -34,6 +67,13 @@ resource "aws_security_group" "icmp" {
     from_port = 8
     to_port = 0
     protocol = "icmp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = -1
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
@@ -48,6 +88,27 @@ resource "aws_security_group" "app" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = -1
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_elasticache_cluster" "countme" {
+  cluster_id           = "countme"
+  engine               = "redis"
+  node_type            = "cache.t2.micro"
+  port                 = 6379
+  num_cache_nodes      = 1
+
+  subnet_group_name = "alegion"
+
+  security_group_ids = [
+    "${aws_security_group.redis.id}"
+  ]
 }
 
 resource "aws_instance" "haproxy" {
