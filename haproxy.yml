@@ -1,0 +1,30 @@
+---
+- hosts: all
+  become: true
+  become_user: root
+
+  tasks:
+  - name: net-snmp
+    yum:
+      name: net-snmp
+      state: latest
+
+  - name: fail2ban
+    yum:
+      name: fail2ban
+      state: latest
+
+  - service:
+      name: fail2ban
+      state: started
+      enabled: yes
+
+  - service:
+      name: snmpd
+      state: restarted
+      enabled: yes
+
+  - name: haproxy
+    yum:
+      name: haproxy
+      state: latest

@@ -51,6 +51,20 @@ resource "aws_security_group" "haproxy" {
     cidr_blocks = ["0.0.0.0/0"]
  }
 
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+ }
+
+  ingress {
+    from_port   = 9000
+    to_port     = 9000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+ }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -78,15 +92,15 @@ resource "aws_security_group" "icmp" {
   }
 }
 
-resource "aws_security_group" "app" {
-  name        = "app"
+resource "aws_security_group" "all_private" {
+  name        = "all_private"
   description = "APP Security Group"
 
   ingress {
-    from_port   = 8080 
-    to_port     = 8080 
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = 0
+    to_port     = 0
+    protocol    = -1
+    cidr_blocks = ["172.31.0.0/16"]
   }
 
   egress {
@@ -116,10 +130,11 @@ resource "aws_instance" "haproxy" {
   instance_type = "t1.micro"
   key_name      = "bmetcalf"
 
-  count = 1
+  count = 2
 
   vpc_security_group_ids = [
     "${aws_security_group.haproxy.id}",
+    "${aws_security_group.all_private.id}",
     "${aws_security_group.ssh.id}",
     "${aws_security_group.icmp.id}"
   ]
@@ -146,10 +161,10 @@ resource "aws_instance" "app" {
   instance_type = "t1.micro"
   key_name      = "bmetcalf"
 
-  count = 2
+  count = 3
 
   vpc_security_group_ids = [
-    "${aws_security_group.app.id}",
+    "${aws_security_group.all_private.id}",
     "${aws_security_group.ssh.id}",
     "${aws_security_group.icmp.id}"
   ]

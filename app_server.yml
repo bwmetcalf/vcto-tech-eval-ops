@@ -1,0 +1,71 @@
+---
+- hosts: all
+  become: true
+  become_user: root
+
+  tasks:
+  - name: net-snmp
+    yum:
+      name: net-snmp
+      state: latest
+
+  - name: fail2ban
+    yum:
+      name: fail2ban
+      state: latest
+
+  - service:
+      name: fail2ban
+      state: started
+      enabled: yes
+
+  - service:
+      name: snmpd
+      state: restarted
+      enabled: yes
+
+  - name: python35
+    yum:
+      name: python35
+      state: latest
+
+  - name: python35-pip
+    yum:
+      name: python35-pip
+      state: latest
+
+  - name: flask
+    command: pip-3.5 install flask
+
+  - name: redis
+    command: pip-3.5 install redis
+
+  - user:
+      name: countme
+      comment: "Count Me"
+
+  - name: create app dir
+    file:
+      path: /opt/countme
+      state: directory
+      owner: countme
+      group: countme
+      mode: 0775
+
+  - copy:
+      src: docker/app.py
+      dest: /opt/countme/app.py
+      owner: countme
+      group: countme
+      mode: 0644
+
+  - name: create home for log files
+    file:
+      path: /var/log/countme
+      state: directory
+      owner: countme
+      group: countme
+      mode: 0775
+
+#  - name: start the application
+#    shell: nohup python3 /opt/company/countme/app.py >/var/log/countme/countme.log 2>&1 &
