@@ -1,0 +1,9 @@
+/var/log/countme/countme.log {
+    daily
+    rotate 5
+    copytruncate
+    missingok
+    notifempty
+    compress
+    delaycompress
+}
